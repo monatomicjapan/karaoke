@@ -30,7 +30,7 @@ To use, open `index.html` in a browser. Default login credentials:
 
 1. From the bill management screen, select **入店中**.
 2. The active bills page lists all bills currently in progress. Each entry shows the bill number and total amount.
-3. Use the **編集** button to change the bill name, or the **清算** button to mark it as paid.
+3. Use the **編集** button to open the bill in the creation screen where all details can be changed. Use **清算** to mark the bill as paid.
 
 ### Settled bills
 

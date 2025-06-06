@@ -31,24 +31,64 @@ function calcExtension(startTime, people) {
     return extraHours * people * 500;
 }
 
+function formatBillLabel(bill) {
+    if (!bill.startTime) return bill.id;
+    const pad = n => String(n).padStart(2, '0');
+    const start = new Date(bill.startTime);
+    const mmdd = `${pad(start.getMonth() + 1)}/${pad(start.getDate())}`;
+    const startStr = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
+    const baseExit = new Date(bill.startTime + 90 * 60 * 1000);
+    let exit = baseExit;
+    let extended = false;
+    if (Date.now() > baseExit.getTime()) {
+        const extraHours = Math.ceil((Date.now() - baseExit.getTime()) / (60 * 60 * 1000));
+        exit = new Date(baseExit.getTime() + extraHours * 60 * 60 * 1000);
+        extended = extraHours > 0;
+    }
+    const exitStr = `${pad(exit.getHours())}:${pad(exit.getMinutes())}`;
+    if (extended) {
+        return `${mmdd} ${startStr} \u5ef6\u9577\u4e2d ${exitStr}`; // 延長中
+    }
+    const baseStr = `${pad(baseExit.getHours())}:${pad(baseExit.getMinutes())}`;
+    return `${mmdd} ${startStr} ${baseStr}`;
+}
+
 // Initialize invoice creation page
-function initNewBillPage() {
-    const bill = {
-        id: null,
-        name: '',
-        seat: '',
-        male: 0,
-        female: 0,
-        plan2500: 0,
-        plan3000: 0,
-        optionalPlans: [],
-        staffD: [],
-        staffT: [],
-        startTime: null,
-        status: 'new',
-        total: 0
-    };
-    document.getElementById('bill-id').textContent = '未発番';
+function initNewBillPage(editId) {
+    const bills = loadBills('bills');
+    let bill;
+    let isEdit = false;
+    if (editId) {
+        bill = bills.find(b => b.id === editId && b.status === 'active');
+        if (!bill) {
+            window.location.href = 'active.html';
+            return;
+        }
+        isEdit = true;
+    } else {
+        bill = {
+            id: null,
+            name: '',
+            seat: '',
+            male: 0,
+            female: 0,
+            plan2500: 0,
+            plan3000: 0,
+            optionalPlans: [],
+            staffD: [],
+            staffT: [],
+            startTime: null,
+            status: 'new',
+            total: 0
+        };
+    }
+    document.getElementById('bill-id').textContent = isEdit ? bill.id : '未発番';
+    const startBtn = document.getElementById('start-btn');
+    startBtn.textContent = isEdit ? '保存' : '開始';
+    const title = document.getElementById('page-title');
+    if (title) {
+        title.textContent = isEdit ? '伝票編集' : '新規伝票作成';
+    }
 
     function updateTotal() {
         let total = bill.plan2500 * 2500 + bill.plan3000 * 3000;
@@ -80,6 +120,16 @@ function initNewBillPage() {
     setupCounter('female-dec','female-inc','female');
     setupCounter('plan2500-dec','plan2500-inc','plan2500');
     setupCounter('plan3000-dec','plan3000-inc','plan3000');
+
+    if (isEdit) {
+        document.getElementById('bill-name').value = bill.name;
+        document.getElementById('male-count').textContent = bill.male;
+        document.getElementById('female-count').textContent = bill.female;
+        document.getElementById('plan2500-count').textContent = bill.plan2500;
+        document.getElementById('plan3000-count').textContent = bill.plan3000;
+        const seat = document.querySelector(`input[name="seat"][value="${bill.seat}"]`);
+        if (seat) seat.checked = true;
+    }
 
     document.getElementById('add-optional-plan').addEventListener('click', () => {
         const container = document.getElementById('optional-plans-container');
@@ -185,16 +235,19 @@ function initNewBillPage() {
     });
 
     document.getElementById('start-btn').addEventListener('click', () => {
-        bill.id = generateBillId();
-        document.getElementById('bill-id').textContent = bill.id;
         bill.name = document.getElementById('bill-name').value;
         const seat = document.querySelector('input[name="seat"]:checked');
         bill.seat = seat ? seat.value : '';
-        bill.startTime = Date.now();
-        bill.status = 'active';
-        updateTotal();
-        const bills = loadBills('bills');
-        bills.push(bill);
+        if (!isEdit) {
+            bill.id = generateBillId();
+            document.getElementById('bill-id').textContent = bill.id;
+            bill.startTime = Date.now();
+            bill.status = 'active';
+            updateTotal();
+            bills.push(bill);
+        } else {
+            updateTotal();
+        }
         saveBills('bills', bills);
         window.location.href = 'active.html';
     });
@@ -269,13 +322,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const startBtn = document.getElementById('start-btn');
     if (startBtn) {
-        initNewBillPage();
-    }
-
-    const saveBtn = document.getElementById('save-btn');
-    if (saveBtn) {
         const params = new URLSearchParams(location.search);
-        initEditPage(params.get('id'));
+        initNewBillPage(params.get('id'));
     }
 
     const activeList = document.getElementById('active-list');
@@ -291,7 +339,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function renderBillRow(container, bill, opts = {}) {
     const div = document.createElement('div');
-    div.textContent = `${bill.id} ${bill.name} 合計${bill.total}円`;
+    div.textContent = `${formatBillLabel(bill)} ${bill.name} 合計${bill.total}円`;
     if (opts.onSettle) {
         const btn = document.createElement('button');
         btn.textContent = '清算';
@@ -331,7 +379,7 @@ function initActivePage() {
                 initActivePage();
             },
             onEdit: billToEdit => {
-                window.location.href = 'edit.html?id=' + encodeURIComponent(billToEdit.id);
+                window.location.href = 'new.html?id=' + encodeURIComponent(billToEdit.id);
             }
         });
     });
