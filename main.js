@@ -84,8 +84,12 @@ function initNewBillPage() {
         const nameInput = document.createElement('input');
         nameInput.placeholder = '項目';
         const priceInput = document.createElement('input');
-        priceInput.type = 'number';
+        priceInput.type = 'text';
+        priceInput.inputMode = 'numeric';
         priceInput.placeholder = '金額';
+        const warning = document.createElement('span');
+        warning.style.color = 'red';
+        warning.style.marginLeft = '4px';
         const dec = document.createElement('button');
         dec.textContent = '-';
         const span = document.createElement('span');
@@ -98,7 +102,17 @@ function initNewBillPage() {
         bill.optionalPlans.push(item);
         function sync() {
             item.name = nameInput.value;
-            item.price = parseInt(priceInput.value || '0',10);
+            if (/^\d+$/.test(priceInput.value)) {
+                item.price = parseInt(priceInput.value, 10);
+                warning.textContent = '';
+            } else {
+                item.price = 0;
+                if (priceInput.value !== '') {
+                    warning.textContent = '数字のみを入力してください';
+                } else {
+                    warning.textContent = '';
+                }
+            }
             span.textContent = item.count;
             updateTotal();
         }
@@ -113,6 +127,7 @@ function initNewBillPage() {
         });
         div.appendChild(nameInput);
         div.appendChild(priceInput);
+        div.appendChild(warning);
         div.appendChild(dec);
         div.appendChild(span);
         div.appendChild(inc);
