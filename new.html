@@ -74,10 +74,17 @@
         <h3>スタッフT (1000円/杯)</h3>
     </div>
     <button type="button" id="add-staff-t">スタッフTを追加</button>
-    <div class="section">
-        <label>ディスカウント: <input type="text" id="discount-input" inputmode="numeric" value="0"></label>
+    <div id="discount-section" class="section">
+        <button type="button" id="discount-enter">ディスカウントを入力</button>
+        <div id="discount-input-area" style="display:none;">
+            <input type="number" id="discount-input" inputmode="numeric">
+            <button type="button" id="discount-ok">OK</button>
+        </div>
+        <div id="discount-display-area" style="display:none;">
+            <span id="discount-display" class="discount"></span>
+            <button type="button" id="discount-delete">削除</button>
+        </div>
     </div>
-    <div class="section">ディスカウント金額: <span id="discount-display" class="discount">0</span>円</div>
     <div class="section">
         合計金額: <span id="total">0</span>円
     </div>
