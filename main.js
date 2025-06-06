@@ -50,8 +50,8 @@ function initNewBillPage() {
     function updateTotal() {
         let total = bill.plan2500 * 2500 + bill.plan3000 * 3000;
         bill.optionalPlans.forEach(p => { total += p.price * p.count; });
-        bill.staffD.forEach(s => { total += 600 * s.count; });
-        bill.staffT.forEach(s => { total += 1000 * s.count; });
+        bill.staffD.forEach(s => { total += s.price * s.count; });
+        bill.staffT.forEach(s => { total += s.price * s.count; });
         total += calcExtension(bill.startTime, bill.male + bill.female);
         bill.total = total;
         document.getElementById('total').textContent = total;
@@ -133,7 +133,7 @@ function initNewBillPage() {
         inc.textContent = '+';
         const remove = document.createElement('button');
         remove.textContent = '削除';
-        const item = {name:'',count:0};
+        const item = {name:'',count:0,price};
         array.push(item);
         function sync() {
             item.name = nameInput.value;
