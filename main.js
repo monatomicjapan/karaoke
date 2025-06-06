@@ -21,7 +21,7 @@ function generateBillId() {
 
 function calcExtension(startTime, people) {
     if (!startTime) return 0;
-    const base = 90 * 60 * 1000; // 90 minutes
+    const base = 80 * 60 * 1000; // 80 minutes
     const diff = Date.now() - startTime;
     if (diff <= base) return 0;
     const extraHours = Math.ceil((diff - base) / (60 * 60 * 1000));
@@ -84,7 +84,7 @@ function initNewBillPage() {
         const nameInput = document.createElement('input');
         nameInput.placeholder = '項目';
         const priceInput = document.createElement('input');
-        priceInput.type = 'number';
+        priceInput.type = 'text';
         priceInput.placeholder = '金額';
         const dec = document.createElement('button');
         dec.textContent = '-';
@@ -180,6 +180,46 @@ function initNewBillPage() {
     });
 }
 
+function renderActiveBills() {
+    const container = document.getElementById('active-list');
+    if (!container) return;
+    const bills = loadBills('bills');
+    container.innerHTML = '';
+    bills.forEach(bill => {
+        const div = document.createElement('div');
+        div.textContent = `${bill.id} ${bill.name} 合計${bill.total}円`;
+        const payBtn = document.createElement('button');
+        payBtn.textContent = '精算';
+        payBtn.addEventListener('click', () => {
+            const active = loadBills('bills');
+            const idx = active.findIndex(b => b.id === bill.id);
+            if (idx !== -1) {
+                const [b] = active.splice(idx, 1);
+                b.status = 'paid';
+                const paid = loadBills('paidBills');
+                paid.push(b);
+                saveBills('bills', active);
+                saveBills('paidBills', paid);
+                renderActiveBills();
+            }
+        });
+        div.appendChild(payBtn);
+        container.appendChild(div);
+    });
+}
+
+function renderPaidBills() {
+    const container = document.getElementById('paid-list');
+    if (!container) return;
+    const bills = loadBills('paidBills');
+    container.innerHTML = '';
+    bills.forEach(bill => {
+        const div = document.createElement('div');
+        div.textContent = `${bill.id} ${bill.name} 合計${bill.total}円`;
+        container.appendChild(div);
+    });
+}
+
 // main entry
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -212,6 +252,20 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const inStoreBtn = document.getElementById('in-store');
+    if (inStoreBtn) {
+        inStoreBtn.addEventListener('click', () => {
+            window.location.href = 'active.html';
+        });
+    }
+
+    const paidBtn = document.getElementById('paid');
+    if (paidBtn) {
+        paidBtn.addEventListener('click', () => {
+            window.location.href = 'paid.html';
+        });
+    }
+
     const newBillBtn = document.getElementById('new-bill');
     if (newBillBtn) {
         newBillBtn.addEventListener('click', () => {
@@ -233,8 +287,30 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const backBills = document.getElementById('back-bills');
+    if (backBills) {
+        backBills.addEventListener('click', () => {
+            window.location.href = 'bills.html';
+        });
+    }
+
+    const backBillsPaid = document.getElementById('back-bills-paid');
+    if (backBillsPaid) {
+        backBillsPaid.addEventListener('click', () => {
+            window.location.href = 'bills.html';
+        });
+    }
+
     const startBtn = document.getElementById('start-btn');
     if (startBtn) {
         initNewBillPage();
+    }
+
+    if (document.getElementById('active-list')) {
+        renderActiveBills();
+    }
+
+    if (document.getElementById('paid-list')) {
+        renderPaidBills();
     }
 });

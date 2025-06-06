@@ -6,6 +6,9 @@ This repository contains a simple web-based application for managing bills at a 
 - `index.html` – login screen.
 - `main.html` – main menu with navigation buttons.
 - `bills.html` – bill management screen.
+- `new.html` – create a new bill.
+- `active.html` – list active bills.
+- `paid.html` – list paid bills.
 - `payment.html` – placeholder for payment features.
 - `admin.html` – placeholder for admin features.
 - `main.js` – common JavaScript for login and navigation logic.
