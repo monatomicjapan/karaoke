@@ -8,6 +8,18 @@
         body { font-family: sans-serif; margin: 1em; }
         .section { margin-bottom: 1em; }
         .counter { display: flex; align-items: center; gap: 0.5em; }
+        .flex-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+        }
+        .flex-row input,
+        .flex-row select {
+            flex: 1 1 auto;
+            min-width: 80px;
+            max-width: 150px;
+        }
         .discount { color: red; }
         @media (min-width: 600px) { .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; } }
         @media (min-width: 900px) { .grid { grid-template-columns: repeat(3,1fr); } }

@@ -170,6 +170,7 @@ function initNewBillPage(editId) {
     document.getElementById('add-optional-plan').addEventListener('click', () => {
         const container = document.getElementById('optional-plans-container');
         const div = document.createElement('div');
+        div.classList.add('flex-row');
         const nameInput = document.createElement('input');
         nameInput.placeholder = '項目';
         const priceInput = document.createElement('input');
@@ -227,6 +228,7 @@ function initNewBillPage(editId) {
 
     function createStaffRow(container, price, array) {
         const div = document.createElement('div');
+        div.classList.add('flex-row');
         const nameInput = document.createElement('input');
         nameInput.setAttribute('list', container.id + '-list');
         const dec = document.createElement('button');
