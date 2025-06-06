@@ -14,6 +14,21 @@
             align-items: center;
             gap: 8px;
         }
+        .person-entry {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            padding: 4px;
+            margin-bottom: 8px;
+        }
+        .person-entry.male { background: #e0f3ff; }
+        .person-entry.female { background: #ffe0ef; }
+        .person-entry input {
+            flex: 1 1 auto;
+            min-width: 80px;
+            max-width: 150px;
+        }
         .flex-row input,
         .flex-row select {
             flex: 1 1 auto;
@@ -41,27 +56,11 @@
         <label><input type="radio" name="seat" value="B奥">B奥</label>
         <label><input type="radio" name="seat" value="Z">Z</label>
     </div>
-    <div class="section grid">
-        <div class="counter">男性: <button type="button" id="male-dec">-</button>
-            <span id="male-count">0</span>
-            <button type="button" id="male-inc">+</button>
-        </div>
-        <div class="counter">女性: <button type="button" id="female-dec">-</button>
-            <span id="female-count">0</span>
-            <button type="button" id="female-inc">+</button>
-        </div>
+    <div class="section people-buttons">
+        <button type="button" id="add-male">男性</button>
+        <button type="button" id="add-female">女性</button>
     </div>
-    <div class="section">
-        <h3>プラン</h3>
-        <div class="counter">2500円: <button type="button" id="plan2500-dec">-</button>
-            <span id="plan2500-count">0</span>
-            <button type="button" id="plan2500-inc">+</button>
-        </div>
-        <div class="counter">3000円: <button type="button" id="plan3000-dec">-</button>
-            <span id="plan3000-count">0</span>
-            <button type="button" id="plan3000-inc">+</button>
-        </div>
-    </div>
+    <div id="people-container" class="section"></div>
     <div id="optional-plans-container" class="section">
         <h3>任意プラン</h3>
     </div>
