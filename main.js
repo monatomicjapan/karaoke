@@ -92,8 +92,14 @@ function initNewBillPage(editId) {
         title.textContent = isEdit ? '伝票編集' : '新規伝票作成';
     }
     const timeInput = document.getElementById('start-time');
+    const discountEnter = document.getElementById('discount-enter');
+    const discountInputArea = document.getElementById('discount-input-area');
     const discountInput = document.getElementById('discount-input');
+    const discountOk = document.getElementById('discount-ok');
+    const discountDisplayArea = document.getElementById('discount-display-area');
     const discountDisplay = document.getElementById('discount-display');
+    const discountDelete = document.getElementById('discount-delete');
+    let discountAmount = bill.discount || 0;
 
     function updateTotal() {
         let total = bill.plan2500 * 2500 + bill.plan3000 * 3000;
@@ -101,11 +107,12 @@ function initNewBillPage(editId) {
         bill.staffD.forEach(s => { total += s.price * s.count; });
         bill.staffT.forEach(s => { total += s.price * s.count; });
         total += calcExtension(bill.startTime, bill.male + bill.female);
-        const discountVal = parseInt(discountInput.value || '0', 10);
-        bill.discount = isNaN(discountVal) ? 0 : discountVal;
-        total -= bill.discount;
+        total -= discountAmount;
+        bill.discount = discountAmount;
         bill.total = total;
-        discountDisplay.textContent = bill.discount;
+        if (discountDisplay) {
+            discountDisplay.textContent = `ディスカウント：${discountAmount}円`;
+        }
         document.getElementById('total').textContent = total;
     }
 
@@ -134,7 +141,6 @@ function initNewBillPage(editId) {
     if (isEdit) {
         const start = new Date(bill.startTime);
         timeInput.value = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
-        discountInput.value = bill.discount;
     } else {
         const now = new Date();
         now.setSeconds(0,0);
@@ -142,9 +148,20 @@ function initNewBillPage(editId) {
         if (m === 60) { now.setHours(now.getHours()+1); now.setMinutes(0); } else { now.setMinutes(m); }
         timeInput.value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
         bill.startTime = now.getTime();
-        discountInput.value = 0;
     }
-    discountDisplay.textContent = bill.discount;
+    function syncDiscountUI() {
+        if (discountAmount > 0) {
+            discountEnter.style.display = 'none';
+            discountInputArea.style.display = 'none';
+            discountDisplayArea.style.display = '';
+            discountDisplay.textContent = `ディスカウント：${discountAmount}円`;
+        } else {
+            discountDisplayArea.style.display = 'none';
+            discountInputArea.style.display = 'none';
+            discountEnter.style.display = '';
+        }
+    }
+    syncDiscountUI();
     timeInput.addEventListener('change', () => {
         if (timeInput.value) {
             const parts = timeInput.value.split(':');
@@ -154,7 +171,22 @@ function initNewBillPage(editId) {
             updateTotal();
         }
     });
-    discountInput.addEventListener('input', updateTotal);
+    discountEnter.addEventListener('click', () => {
+        discountEnter.style.display = 'none';
+        discountInputArea.style.display = '';
+        discountInput.value = discountAmount || 0;
+    });
+    discountOk.addEventListener('click', () => {
+        const val = parseInt(discountInput.value || '0', 10);
+        discountAmount = isNaN(val) ? 0 : val;
+        syncDiscountUI();
+        updateTotal();
+    });
+    discountDelete.addEventListener('click', () => {
+        discountAmount = 0;
+        syncDiscountUI();
+        updateTotal();
+    });
     updateTotal();
 
     if (isEdit) {
