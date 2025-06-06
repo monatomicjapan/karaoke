@@ -34,7 +34,7 @@ function calcExtension(startTime, people) {
 // Initialize invoice creation page
 function initNewBillPage() {
     const bill = {
-        id: generateBillId(),
+        id: null,
         name: '',
         seat: '',
         male: 0,
@@ -48,7 +48,7 @@ function initNewBillPage() {
         status: 'new',
         total: 0
     };
-    document.getElementById('bill-id').textContent = bill.id;
+    document.getElementById('bill-id').textContent = '未発番';
 
     function updateTotal() {
         let total = bill.plan2500 * 2500 + bill.plan3000 * 3000;
@@ -185,6 +185,8 @@ function initNewBillPage() {
     });
 
     document.getElementById('start-btn').addEventListener('click', () => {
+        bill.id = generateBillId();
+        document.getElementById('bill-id').textContent = bill.id;
         bill.name = document.getElementById('bill-name').value;
         const seat = document.querySelector('input[name="seat"]:checked');
         bill.seat = seat ? seat.value : '';
@@ -270,6 +272,12 @@ document.addEventListener('DOMContentLoaded', () => {
         initNewBillPage();
     }
 
+    const saveBtn = document.getElementById('save-btn');
+    if (saveBtn) {
+        const params = new URLSearchParams(location.search);
+        initEditPage(params.get('id'));
+    }
+
     const activeList = document.getElementById('active-list');
     if (activeList) {
         initActivePage();
@@ -281,13 +289,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-function renderBillRow(container, bill, onSettle) {
+function renderBillRow(container, bill, opts = {}) {
     const div = document.createElement('div');
     div.textContent = `${bill.id} ${bill.name} 合計${bill.total}円`;
-    if (onSettle) {
+    if (opts.onSettle) {
         const btn = document.createElement('button');
         btn.textContent = '清算';
-        btn.addEventListener('click', () => onSettle(bill));
+        btn.addEventListener('click', () => opts.onSettle(bill));
+        div.appendChild(btn);
+    }
+    if (opts.onEdit) {
+        const btn = document.createElement('button');
+        btn.textContent = '編集';
+        btn.addEventListener('click', () => opts.onEdit(bill));
+        div.appendChild(btn);
+    }
+    if (opts.onActivate) {
+        const btn = document.createElement('button');
+        btn.textContent = '戻す';
+        btn.addEventListener('click', () => opts.onActivate(bill));
+        div.appendChild(btn);
+    }
+    if (opts.onDelete) {
+        const btn = document.createElement('button');
+        btn.textContent = '削除';
+        btn.addEventListener('click', () => opts.onDelete(bill));
         div.appendChild(btn);
     }
     container.appendChild(div);
@@ -298,10 +324,15 @@ function initActivePage() {
     const bills = loadBills('bills');
     container.innerHTML = '';
     bills.filter(b => b.status === 'active').forEach(bill => {
-        renderBillRow(container, bill, billToSettle => {
-            billToSettle.status = 'paid';
-            saveBills('bills', bills);
-            initActivePage();
+        renderBillRow(container, bill, {
+            onSettle: billToSettle => {
+                billToSettle.status = 'paid';
+                saveBills('bills', bills);
+                initActivePage();
+            },
+            onEdit: billToEdit => {
+                window.location.href = 'edit.html?id=' + encodeURIComponent(billToEdit.id);
+            }
         });
     });
 }
@@ -311,6 +342,41 @@ function initPaidPage() {
     const bills = loadBills('bills');
     container.innerHTML = '';
     bills.filter(b => b.status === 'paid').forEach(bill => {
-        renderBillRow(container, bill);
+        renderBillRow(container, bill, {
+            onActivate: b => {
+                b.status = 'active';
+                saveBills('bills', bills);
+                initPaidPage();
+            },
+            onDelete: b => {
+                if (confirm('本当に削除しますか?')) {
+                    const pwd = prompt('パスワードを入力してください');
+                    if (pwd === localStorage.getItem('password')) {
+                        bills.splice(bills.indexOf(b), 1);
+                        saveBills('bills', bills);
+                        initPaidPage();
+                    } else {
+                        alert('パスワードが違います');
+                    }
+                }
+            }
+        });
+    });
+}
+
+function initEditPage(id) {
+    const bills = loadBills('bills');
+    const bill = bills.find(b => b.id === id && b.status === 'active');
+    if (!bill) {
+        window.location.href = 'active.html';
+        return;
+    }
+    document.getElementById('bill-id').textContent = bill.id;
+    const nameInput = document.getElementById('bill-name');
+    nameInput.value = bill.name;
+    document.getElementById('save-btn').addEventListener('click', () => {
+        bill.name = nameInput.value;
+        saveBills('bills', bills);
+        window.location.href = 'active.html';
     });
 }
