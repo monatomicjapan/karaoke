@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Bill</title>
+</head>
+<body>
+    <h1>新規伝票作成</h1>
+    <div>伝票番号: <span id="bill-id"></span></div>
+    <div>
+        <label>伝票名: <input type="text" id="bill-name"></label>
+    </div>
+    <div>
+        席:
+        <label><input type="radio" name="seat" value="C">C</label>
+        <label><input type="radio" name="seat" value="B入口">B入口</label>
+        <label><input type="radio" name="seat" value="B奥">B奥</label>
+        <label><input type="radio" name="seat" value="Z">Z</label>
+    </div>
+    <div>
+        男性: <button type="button" id="male-dec">-</button>
+        <span id="male-count">0</span>
+        <button type="button" id="male-inc">+</button>
+    </div>
+    <div>
+        女性: <button type="button" id="female-dec">-</button>
+        <span id="female-count">0</span>
+        <button type="button" id="female-inc">+</button>
+    </div>
+    <div>
+        <h3>プラン</h3>
+        <div>2500円: <button type="button" id="plan2500-dec">-</button>
+            <span id="plan2500-count">0</span>
+            <button type="button" id="plan2500-inc">+</button>
+        </div>
+        <div>3000円: <button type="button" id="plan3000-dec">-</button>
+            <span id="plan3000-count">0</span>
+            <button type="button" id="plan3000-inc">+</button>
+        </div>
+    </div>
+    <div id="optional-plans-container">
+        <h3>任意プラン</h3>
+    </div>
+    <button type="button" id="add-optional-plan">任意プランを追加</button>
+    <div id="staff-d-container">
+        <h3>スタッフD (600円/杯)</h3>
+    </div>
+    <button type="button" id="add-staff-d">スタッフDを追加</button>
+    <div id="staff-t-container">
+        <h3>スタッフT (1000円/杯)</h3>
+    </div>
+    <button type="button" id="add-staff-t">スタッフTを追加</button>
+    <div>
+        合計金額: <span id="total">0</span>円
+    </div>
+    <button type="button" id="start-btn">開始</button>
+    <script src="main.js"></script>
+</body>
+</html>
