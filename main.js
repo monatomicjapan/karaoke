@@ -233,8 +233,66 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    const inStoreBtn = document.getElementById('in-store');
+    if (inStoreBtn) {
+        inStoreBtn.addEventListener('click', () => {
+            window.location.href = 'active.html';
+        });
+    }
+
+    const paidBtn = document.getElementById('paid');
+    if (paidBtn) {
+        paidBtn.addEventListener('click', () => {
+            window.location.href = 'paid.html';
+        });
+    }
+
     const startBtn = document.getElementById('start-btn');
     if (startBtn) {
         initNewBillPage();
     }
+
+    const activeList = document.getElementById('active-list');
+    if (activeList) {
+        initActivePage();
+    }
+
+    const paidList = document.getElementById('paid-list');
+    if (paidList) {
+        initPaidPage();
+    }
 });
+
+function renderBillRow(container, bill, onSettle) {
+    const div = document.createElement('div');
+    div.textContent = `${bill.id} ${bill.name} 合計${bill.total}円`;
+    if (onSettle) {
+        const btn = document.createElement('button');
+        btn.textContent = '清算';
+        btn.addEventListener('click', () => onSettle(bill));
+        div.appendChild(btn);
+    }
+    container.appendChild(div);
+}
+
+function initActivePage() {
+    const container = document.getElementById('active-list');
+    const bills = loadBills('bills');
+    container.innerHTML = '';
+    bills.filter(b => b.status === 'active').forEach(bill => {
+        renderBillRow(container, bill, billToSettle => {
+            billToSettle.status = 'paid';
+            saveBills('bills', bills);
+            initActivePage();
+        });
+    });
+}
+
+function initPaidPage() {
+    const container = document.getElementById('paid-list');
+    const bills = loadBills('bills');
+    container.innerHTML = '';
+    bills.filter(b => b.status === 'paid').forEach(bill => {
+        renderBillRow(container, bill);
+    });
+}

@@ -13,3 +13,25 @@ This repository contains a simple web-based application for managing bills at a 
 To use, open `index.html` in a browser. Default login credentials:
 - **Email**: `admin@karaoke.jp`
 - **Password**: `12345678`
+
+## Usage
+
+1. Open `index.html` in your web browser and log in using the credentials above.
+2. After logging in, choose **伝票** to open the bill management screen.
+
+### Creating and starting a bill
+
+1. Click **新規伝票**.
+2. Enter a bill name, select a seat and adjust the guest and plan counts.
+3. Press **開始** to start the bill. The bill is saved locally and becomes active.
+
+### Viewing active bills
+
+1. From the bill management screen, select **入店中**.
+2. The active bills page lists all bills currently in progress. Each entry shows the bill number and total amount.
+3. Use the **清算** button next to a bill to mark it as paid.
+
+### Settled bills
+
+1. Once a bill is settled, it no longer appears in the active list.
+2. Select **清算済** from the bill management screen to view a list of paid bills.
