@@ -3,11 +3,20 @@ const DEFAULT_PASSWORD = '12345678';
 
 // Utility to read/write bill arrays
 function loadBills(key) {
-    return JSON.parse(localStorage.getItem(key) || '[]');
+    try {
+        return JSON.parse(localStorage.getItem(key) || '[]');
+    } catch (e) {
+        console.error('localStorage load error', e);
+        return [];
+    }
 }
 
 function saveBills(key, bills) {
-    localStorage.setItem(key, JSON.stringify(bills));
+    try {
+        localStorage.setItem(key, JSON.stringify(bills));
+    } catch (e) {
+        console.error('localStorage save error', e);
+    }
 }
 
 function generateBillId() {
@@ -384,9 +393,13 @@ function initNewBillPage(editId) {
 // main entry
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (!localStorage.getItem('email')) {
-        localStorage.setItem('email', DEFAULT_EMAIL);
-        localStorage.setItem('password', DEFAULT_PASSWORD);
+    try {
+        if (!localStorage.getItem('email')) {
+            localStorage.setItem('email', DEFAULT_EMAIL);
+            localStorage.setItem('password', DEFAULT_PASSWORD);
+        }
+    } catch (e) {
+        console.error('localStorage access error', e);
     }
 
     const form = document.getElementById('login-form');
@@ -396,8 +409,14 @@ document.addEventListener('DOMContentLoaded', () => {
             event.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const storedEmail = localStorage.getItem('email');
-            const storedPassword = localStorage.getItem('password');
+            let storedEmail = null;
+            let storedPassword = null;
+            try {
+                storedEmail = localStorage.getItem('email');
+                storedPassword = localStorage.getItem('password');
+            } catch (e) {
+                console.error('localStorage access error', e);
+            }
             if (email === storedEmail && password === storedPassword) {
                 window.location.href = "main.html";
             } else {
