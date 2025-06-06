@@ -71,10 +71,7 @@ function initNewBillPage(editId) {
             id: null,
             name: '',
             seat: '',
-            male: 0,
-            female: 0,
-            plan2500: 0,
-            plan3000: 0,
+            people: [],
             optionalPlans: [],
             staffD: [],
             staffT: [],
@@ -99,14 +96,18 @@ function initNewBillPage(editId) {
     const discountDisplayArea = document.getElementById('discount-display-area');
     const discountDisplay = document.getElementById('discount-display');
     const discountDelete = document.getElementById('discount-delete');
+    const peopleContainer = document.getElementById('people-container');
     let discountAmount = bill.discount || 0;
 
+
     function updateTotal() {
-        let total = bill.plan2500 * 2500 + bill.plan3000 * 3000;
+        let total = 0;
+        bill.people.forEach(p => { if (p.plan) total += p.plan; });
         bill.optionalPlans.forEach(p => { total += p.price * p.count; });
         bill.staffD.forEach(s => { total += s.price * s.count; });
         bill.staffT.forEach(s => { total += s.price * s.count; });
-        total += calcExtension(bill.startTime, bill.male + bill.female);
+        const activePeople = bill.people.filter(p => !p.earlyExit).length;
+        total += calcExtension(bill.startTime, activePeople);
         total -= discountAmount;
         bill.discount = discountAmount;
         bill.total = total;
@@ -116,26 +117,79 @@ function initNewBillPage(editId) {
         document.getElementById('total').textContent = total;
     }
 
-    function setupCounter(decBtnId, incBtnId, prop) {
-        const dec = document.getElementById(decBtnId);
-        const inc = document.getElementById(incBtnId);
-        const span = document.getElementById(prop + '-count');
-        dec.addEventListener('click', () => {
-            if (bill[prop] > 0) bill[prop]--;
-            span.textContent = bill[prop];
+    function addPerson(gender, existing) {
+        const person = existing || { name: '', gender, plan: null, earlyExit: false };
+        bill.people.push(person);
+        const div = document.createElement('div');
+        div.classList.add('person-entry', gender);
+
+        const nameInput = document.createElement('input');
+        nameInput.placeholder = '名前を入力';
+        nameInput.value = person.name || '';
+        nameInput.addEventListener('input', () => { person.name = nameInput.value; });
+
+        const planChoice = document.createElement('div');
+        const btn2500 = document.createElement('button');
+        btn2500.textContent = '2500円';
+        const btn3000 = document.createElement('button');
+        btn3000.textContent = '3000円';
+        planChoice.appendChild(btn2500);
+        planChoice.appendChild(btn3000);
+
+        const planDisplay = document.createElement('div');
+        const planSpan = document.createElement('span');
+        const changeBtn = document.createElement('button');
+        changeBtn.textContent = 'プラン変更';
+        planDisplay.appendChild(planSpan);
+        planDisplay.appendChild(changeBtn);
+        planDisplay.style.display = 'none';
+
+        function selectPlan(price) {
+            person.plan = price;
+            planSpan.textContent = price + '円';
+            planChoice.style.display = 'none';
+            planDisplay.style.display = '';
+            updateTotal();
+        }
+        btn2500.addEventListener('click', () => selectPlan(2500));
+        btn3000.addEventListener('click', () => selectPlan(3000));
+        changeBtn.addEventListener('click', () => {
+            planChoice.style.display = '';
+            planDisplay.style.display = 'none';
+        });
+
+        if (person.plan) {
+            planSpan.textContent = person.plan + '円';
+            planChoice.style.display = 'none';
+            planDisplay.style.display = '';
+        }
+
+        const earlyBtn = document.createElement('button');
+        earlyBtn.textContent = person.earlyExit ? '早退中' : '早退';
+        earlyBtn.addEventListener('click', () => {
+            person.earlyExit = !person.earlyExit;
+            earlyBtn.textContent = person.earlyExit ? '早退中' : '早退';
             updateTotal();
         });
-        inc.addEventListener('click', () => {
-            bill[prop]++;
-            span.textContent = bill[prop];
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '削除';
+        removeBtn.addEventListener('click', () => {
+            bill.people.splice(bill.people.indexOf(person), 1);
+            peopleContainer.removeChild(div);
             updateTotal();
         });
+
+        div.appendChild(nameInput);
+        div.appendChild(planChoice);
+        div.appendChild(planDisplay);
+        div.appendChild(earlyBtn);
+        div.appendChild(removeBtn);
+        peopleContainer.appendChild(div);
+        updateTotal();
     }
 
-    setupCounter('male-dec','male-inc','male');
-    setupCounter('female-dec','female-inc','female');
-    setupCounter('plan2500-dec','plan2500-inc','plan2500');
-    setupCounter('plan3000-dec','plan3000-inc','plan3000');
+
 
     const pad = n => String(n).padStart(2, '0');
     if (isEdit) {
@@ -187,16 +241,19 @@ function initNewBillPage(editId) {
         syncDiscountUI();
         updateTotal();
     });
+
+    document.getElementById('add-male').addEventListener('click', () => addPerson('male'));
+    document.getElementById('add-female').addEventListener('click', () => addPerson('female'));
+
     updateTotal();
 
     if (isEdit) {
         document.getElementById('bill-name').value = bill.name;
-        document.getElementById('male-count').textContent = bill.male;
-        document.getElementById('female-count').textContent = bill.female;
-        document.getElementById('plan2500-count').textContent = bill.plan2500;
-        document.getElementById('plan3000-count').textContent = bill.plan3000;
         const seat = document.querySelector(`input[name="seat"][value="${bill.seat}"]`);
         if (seat) seat.checked = true;
+        if (Array.isArray(bill.people)) {
+            bill.people.forEach(p => addPerson(p.gender, p));
+        }
     }
 
     document.getElementById('add-optional-plan').addEventListener('click', () => {
