@@ -4,57 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Bill</title>
+    <style>
+        body { font-family: sans-serif; margin: 1em; }
+        .section { margin-bottom: 1em; }
+        .counter { display: flex; align-items: center; gap: 0.5em; }
+        .discount { color: red; }
+        @media (min-width: 600px) { .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; } }
+        @media (min-width: 900px) { .grid { grid-template-columns: repeat(3,1fr); } }
+    </style>
 </head>
 <body>
     <h1 id="page-title">新規伝票作成</h1>
-    <div>伝票番号: <span id="bill-id"></span></div>
-    <div>
+    <div class="section">伝票番号: <span id="bill-id"></span></div>
+    <div class="section">
         <label>伝票名: <input type="text" id="bill-name"></label>
     </div>
-    <div>
+    <div class="section">
+        <label>入店時間: <input type="time" id="start-time" step="300"></label>
+    </div>
+    <div class="section">
         席:
         <label><input type="radio" name="seat" value="C">C</label>
         <label><input type="radio" name="seat" value="B入口">B入口</label>
         <label><input type="radio" name="seat" value="B奥">B奥</label>
         <label><input type="radio" name="seat" value="Z">Z</label>
     </div>
-    <div>
-        男性: <button type="button" id="male-dec">-</button>
-        <span id="male-count">0</span>
-        <button type="button" id="male-inc">+</button>
+    <div class="section grid">
+        <div class="counter">男性: <button type="button" id="male-dec">-</button>
+            <span id="male-count">0</span>
+            <button type="button" id="male-inc">+</button>
+        </div>
+        <div class="counter">女性: <button type="button" id="female-dec">-</button>
+            <span id="female-count">0</span>
+            <button type="button" id="female-inc">+</button>
+        </div>
     </div>
-    <div>
-        女性: <button type="button" id="female-dec">-</button>
-        <span id="female-count">0</span>
-        <button type="button" id="female-inc">+</button>
-    </div>
-    <div>
+    <div class="section">
         <h3>プラン</h3>
-        <div>2500円: <button type="button" id="plan2500-dec">-</button>
+        <div class="counter">2500円: <button type="button" id="plan2500-dec">-</button>
             <span id="plan2500-count">0</span>
             <button type="button" id="plan2500-inc">+</button>
         </div>
-        <div>3000円: <button type="button" id="plan3000-dec">-</button>
+        <div class="counter">3000円: <button type="button" id="plan3000-dec">-</button>
             <span id="plan3000-count">0</span>
             <button type="button" id="plan3000-inc">+</button>
         </div>
     </div>
-    <div id="optional-plans-container">
+    <div id="optional-plans-container" class="section">
         <h3>任意プラン</h3>
     </div>
     <button type="button" id="add-optional-plan">任意プランを追加</button>
-    <div id="staff-d-container">
+    <div id="staff-d-container" class="section">
         <h3>スタッフD (600円/杯)</h3>
     </div>
     <button type="button" id="add-staff-d">スタッフDを追加</button>
-    <div id="staff-t-container">
+    <div id="staff-t-container" class="section">
         <h3>スタッフT (1000円/杯)</h3>
     </div>
     <button type="button" id="add-staff-t">スタッフTを追加</button>
-    <div>
+    <div class="section">
+        <label>ディスカウント: <input type="text" id="discount-input" inputmode="numeric" value="0"></label>
+    </div>
+    <div class="section">ディスカウント金額: <span id="discount-display" class="discount">0</span>円</div>
+    <div class="section">
         合計金額: <span id="total">0</span>円
     </div>
-    <button type="button" id="start-btn">開始</button>
+    <button type="button" id="start-btn">保存</button>
     <script src="main.js"></script>
 </body>
 </html>

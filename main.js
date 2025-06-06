@@ -64,6 +64,7 @@ function initNewBillPage(editId) {
             window.location.href = 'active.html';
             return;
         }
+        if (!('discount' in bill)) bill.discount = 0;
         isEdit = true;
     } else {
         bill = {
@@ -77,6 +78,7 @@ function initNewBillPage(editId) {
             optionalPlans: [],
             staffD: [],
             staffT: [],
+            discount: 0,
             startTime: null,
             status: 'new',
             total: 0
@@ -84,11 +86,14 @@ function initNewBillPage(editId) {
     }
     document.getElementById('bill-id').textContent = isEdit ? bill.id : '未発番';
     const startBtn = document.getElementById('start-btn');
-    startBtn.textContent = isEdit ? '保存' : '開始';
+    startBtn.textContent = '保存';
     const title = document.getElementById('page-title');
     if (title) {
         title.textContent = isEdit ? '伝票編集' : '新規伝票作成';
     }
+    const timeInput = document.getElementById('start-time');
+    const discountInput = document.getElementById('discount-input');
+    const discountDisplay = document.getElementById('discount-display');
 
     function updateTotal() {
         let total = bill.plan2500 * 2500 + bill.plan3000 * 3000;
@@ -96,7 +101,11 @@ function initNewBillPage(editId) {
         bill.staffD.forEach(s => { total += s.price * s.count; });
         bill.staffT.forEach(s => { total += s.price * s.count; });
         total += calcExtension(bill.startTime, bill.male + bill.female);
+        const discountVal = parseInt(discountInput.value || '0', 10);
+        bill.discount = isNaN(discountVal) ? 0 : discountVal;
+        total -= bill.discount;
         bill.total = total;
+        discountDisplay.textContent = bill.discount;
         document.getElementById('total').textContent = total;
     }
 
@@ -120,6 +129,33 @@ function initNewBillPage(editId) {
     setupCounter('female-dec','female-inc','female');
     setupCounter('plan2500-dec','plan2500-inc','plan2500');
     setupCounter('plan3000-dec','plan3000-inc','plan3000');
+
+    const pad = n => String(n).padStart(2, '0');
+    if (isEdit) {
+        const start = new Date(bill.startTime);
+        timeInput.value = `${pad(start.getHours())}:${pad(start.getMinutes())}`;
+        discountInput.value = bill.discount;
+    } else {
+        const now = new Date();
+        now.setSeconds(0,0);
+        const m = Math.ceil(now.getMinutes() / 5) * 5;
+        if (m === 60) { now.setHours(now.getHours()+1); now.setMinutes(0); } else { now.setMinutes(m); }
+        timeInput.value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        bill.startTime = now.getTime();
+        discountInput.value = 0;
+    }
+    discountDisplay.textContent = bill.discount;
+    timeInput.addEventListener('change', () => {
+        if (timeInput.value) {
+            const parts = timeInput.value.split(':');
+            const d = new Date();
+            d.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+            bill.startTime = d.getTime();
+            updateTotal();
+        }
+    });
+    discountInput.addEventListener('input', updateTotal);
+    updateTotal();
 
     if (isEdit) {
         document.getElementById('bill-name').value = bill.name;
@@ -238,15 +274,16 @@ function initNewBillPage(editId) {
         bill.name = document.getElementById('bill-name').value;
         const seat = document.querySelector('input[name="seat"]:checked');
         bill.seat = seat ? seat.value : '';
+        const parts = timeInput.value.split(':');
+        const d = new Date();
+        d.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+        bill.startTime = d.getTime();
+        updateTotal();
         if (!isEdit) {
             bill.id = generateBillId();
             document.getElementById('bill-id').textContent = bill.id;
-            bill.startTime = Date.now();
             bill.status = 'active';
-            updateTotal();
             bills.push(bill);
-        } else {
-            updateTotal();
         }
         saveBills('bills', bills);
         window.location.href = 'active.html';
