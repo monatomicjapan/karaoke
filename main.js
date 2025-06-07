@@ -203,16 +203,22 @@ function initNewBillPage(editId) {
         }
 
         const earlyBtn = document.createElement('button');
-        const earlyTimeSpan = document.createElement('span');
-        earlyTimeSpan.style.marginLeft = '4px';
+        const earlyTimeInput = document.createElement('input');
+        earlyTimeInput.type = 'time';
+        earlyTimeInput.step = '300';
+        earlyTimeInput.style.marginLeft = '4px';
+        earlyTimeInput.style.display = 'none';
         const updateEarlyDisplay = () => {
-            if (person.earlyExit && person.earlyExitTime) {
-                const d = new Date(person.earlyExitTime);
-                earlyTimeSpan.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            if (person.earlyExit) {
                 earlyBtn.textContent = '早退中';
+                earlyTimeInput.style.display = '';
+                if (person.earlyExitTime) {
+                    const d = new Date(person.earlyExitTime);
+                    earlyTimeInput.value = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                }
             } else {
-                earlyTimeSpan.textContent = '';
                 earlyBtn.textContent = '早退';
+                earlyTimeInput.style.display = 'none';
             }
         };
         updateEarlyDisplay();
@@ -228,6 +234,16 @@ function initNewBillPage(editId) {
             updateTotal();
             saveBills('bills', bills);
         });
+        earlyTimeInput.addEventListener('change', () => {
+            if (earlyTimeInput.value) {
+                const parts = earlyTimeInput.value.split(':');
+                const d = new Date();
+                d.setHours(parseInt(parts[0], 10), parseInt(parts[1], 10), 0, 0);
+                person.earlyExitTime = d.getTime();
+                updateTotal();
+                saveBills('bills', bills);
+            }
+        });
 
         const removeBtn = document.createElement('button');
         removeBtn.textContent = '削除';
@@ -241,7 +257,7 @@ function initNewBillPage(editId) {
         div.appendChild(planChoice);
         div.appendChild(planDisplay);
         div.appendChild(earlyBtn);
-        div.appendChild(earlyTimeSpan);
+        div.appendChild(earlyTimeInput);
         div.appendChild(removeBtn);
         peopleContainer.appendChild(div);
         updateTotal();
