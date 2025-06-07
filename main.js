@@ -31,10 +31,10 @@ function generateBillId() {
     return ymd + '-' + seq;
 }
 
-function calcExtension(startTime, people) {
+function calcExtension(startTime, people, endTime = Date.now()) {
     if (!startTime) return 0;
     const base = 90 * 60 * 1000; // 90 minutes
-    const diff = Date.now() - startTime;
+    const diff = endTime - startTime;
     if (diff <= base) return 0;
     const extraHours = Math.ceil((diff - base) / (60 * 60 * 1000));
     return extraHours * people * 500;
@@ -125,8 +125,11 @@ function initNewBillPage(editId) {
         bill.optionalPlans.forEach(p => { total += p.price * p.count; });
         bill.staffD.forEach(s => { total += s.price * s.count; });
         bill.staffT.forEach(s => { total += s.price * s.count; });
-        const activePeople = bill.people.filter(p => !p.earlyExit).length;
-        const extension = calcExtension(bill.startTime, activePeople);
+        let extension = 0;
+        bill.people.forEach(p => {
+            const exitTime = p.earlyExit ? p.earlyExitTime : Date.now();
+            extension += calcExtension(bill.startTime, 1, exitTime);
+        });
         total += extension;
         total -= discountAmount;
         bill.discount = discountAmount;
@@ -151,7 +154,9 @@ function initNewBillPage(editId) {
     }
 
     function addPerson(gender, existing) {
-        const person = existing || { name: '', gender, plan: null, earlyExit: false };
+        const person = existing || { name: '', gender, plan: null, earlyExit: false, earlyExitTime: null };
+        if (!('earlyExit' in person)) person.earlyExit = false;
+        if (!('earlyExitTime' in person)) person.earlyExitTime = null;
         bill.people.push(person);
         const div = document.createElement('div');
         div.classList.add('person-entry', gender);
@@ -198,10 +203,28 @@ function initNewBillPage(editId) {
         }
 
         const earlyBtn = document.createElement('button');
-        earlyBtn.textContent = person.earlyExit ? '早退中' : '早退';
+        const earlyTimeSpan = document.createElement('span');
+        earlyTimeSpan.style.marginLeft = '4px';
+        const updateEarlyDisplay = () => {
+            if (person.earlyExit && person.earlyExitTime) {
+                const d = new Date(person.earlyExitTime);
+                earlyTimeSpan.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+                earlyBtn.textContent = '早退中';
+            } else {
+                earlyTimeSpan.textContent = '';
+                earlyBtn.textContent = '早退';
+            }
+        };
+        updateEarlyDisplay();
         earlyBtn.addEventListener('click', () => {
-            person.earlyExit = !person.earlyExit;
-            earlyBtn.textContent = person.earlyExit ? '早退中' : '早退';
+            if (!person.earlyExit) {
+                person.earlyExit = true;
+                person.earlyExitTime = Date.now();
+            } else {
+                person.earlyExit = false;
+                person.earlyExitTime = null;
+            }
+            updateEarlyDisplay();
             updateTotal();
         });
 
@@ -217,6 +240,7 @@ function initNewBillPage(editId) {
         div.appendChild(planChoice);
         div.appendChild(planDisplay);
         div.appendChild(earlyBtn);
+        div.appendChild(earlyTimeSpan);
         div.appendChild(removeBtn);
         peopleContainer.appendChild(div);
         updateTotal();
