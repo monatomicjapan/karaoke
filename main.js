@@ -31,6 +31,7 @@ function generateBillId() {
     return ymd + '-' + seq;
 }
 
+// calculate extension fee for a single person between start and end times
 function calcExtensionForPeriod(startTime, endTime) {
     if (!startTime || !endTime) return 0;
     const base = 90 * 60 * 1000; // 90 minutes
