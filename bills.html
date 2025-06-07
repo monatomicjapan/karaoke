@@ -4,12 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bills</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
+    <header>
+        <button onclick="window.location.href='main.html'" class="back-btn">&#x2190; Back to Menu</button>
+        <button id="theme-toggle" class="back-btn" aria-label="Toggle theme">🌓</button>
+    </header>
     <h1>伝票管理</h1>
-    <button id="new-bill">新規伝票</button>
-    <button id="in-store">入店中</button>
-    <button id="paid">清算済</button>
+    <div class="menu">
+        <button id="new-bill" class="menu-btn primary"><span class="material-icons">add</span>新規伝票</button>
+        <button id="in-store" class="menu-btn"><span class="material-icons">list</span>入店中</button>
+        <button id="paid" class="menu-btn"><span class="material-icons">done</span>清算済</button>
+    </div>
 
     <script src="main.js"></script>
 </body>

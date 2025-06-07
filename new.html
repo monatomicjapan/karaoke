@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Bill</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         body { font-family: sans-serif; margin: 1em; }
         .section { margin-bottom: 1em; }
@@ -44,6 +46,10 @@
     </style>
 </head>
 <body>
+    <header>
+        <button onclick="window.location.href='bills.html'" class="back-btn">&#x2190; Back to Menu</button>
+        <button id="theme-toggle" class="back-btn" aria-label="Toggle theme">🌓</button>
+    </header>
     <h1 id="page-title">新規伝票作成</h1>
     <div class="section">伝票番号: <span id="bill-id"></span></div>
     <div class="section">
