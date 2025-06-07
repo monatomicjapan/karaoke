@@ -226,6 +226,7 @@ function initNewBillPage(editId) {
             }
             updateEarlyDisplay();
             updateTotal();
+            saveBills('bills', bills);
         });
 
         const removeBtn = document.createElement('button');
