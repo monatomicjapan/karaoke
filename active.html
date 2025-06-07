@@ -4,11 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Active Bills</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
+    <header>
+        <button onclick="window.location.href='bills.html'" class="back-btn">&#x2190; Back to Menu</button>
+        <button id="theme-toggle" class="back-btn" aria-label="Toggle theme">🌓</button>
+    </header>
     <h1>入店中の伝票</h1>
     <div id="active-list"></div>
-    <button onclick="window.location.href='bills.html'">戻る</button>
     <script src="main.js"></script>
 </body>
 </html>

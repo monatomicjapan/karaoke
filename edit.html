@@ -4,14 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Bill</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
 <body>
+    <header>
+        <button onclick="window.location.href='active.html'" class="back-btn">&#x2190; Back to Menu</button>
+        <button id="theme-toggle" class="back-btn" aria-label="Toggle theme">🌓</button>
+    </header>
     <h1>伝票編集</h1>
     <div>伝票番号: <span id="bill-id"></span></div>
     <div>
         <label>伝票名: <input type="text" id="bill-name"></label>
     </div>
-    <button type="button" id="save-btn">保存</button>
+    <button type="button" id="save-btn" class="primary">保存</button>
     <button type="button" onclick="window.location.href='active.html'">キャンセル</button>
     <script src="main.js"></script>
 </body>

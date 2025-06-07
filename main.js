@@ -1,6 +1,50 @@
 const DEFAULT_EMAIL = 'admin@karaoke.jp';
 const DEFAULT_PASSWORD = '12345678';
 
+function applyTheme() {
+    const theme = localStorage.getItem('theme') || 'light';
+    if (theme === 'dark') {
+        document.body.classList.add('dark');
+    } else {
+        document.body.classList.remove('dark');
+    }
+}
+
+function setupThemeToggle() {
+    applyTheme();
+    const toggle = document.getElementById('theme-toggle');
+    if (toggle) {
+        toggle.addEventListener('click', () => {
+            const cur = localStorage.getItem('theme') === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('theme', cur);
+            applyTheme();
+        });
+    }
+}
+
+function confirmModal(message) {
+    return new Promise(resolve => {
+        const overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        const p = document.createElement('p');
+        p.textContent = message;
+        const ok = document.createElement('button');
+        ok.textContent = 'OK';
+        ok.className = 'primary';
+        const cancel = document.createElement('button');
+        cancel.textContent = 'キャンセル';
+        modal.appendChild(p);
+        modal.appendChild(ok);
+        modal.appendChild(cancel);
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        ok.addEventListener('click', () => { document.body.removeChild(overlay); resolve(true); });
+        cancel.addEventListener('click', () => { document.body.removeChild(overlay); resolve(false); });
+    });
+}
+
 // Utility to read/write bill arrays
 function loadBills(key) {
     try {
@@ -247,10 +291,12 @@ function initNewBillPage(editId) {
 
         const removeBtn = document.createElement('button');
         removeBtn.textContent = '削除';
-        removeBtn.addEventListener('click', () => {
-            bill.people.splice(bill.people.indexOf(person), 1);
-            peopleContainer.removeChild(div);
-            updateTotal();
+        removeBtn.addEventListener('click', async () => {
+            if (await confirmModal('本当に削除しますか?')) {
+                bill.people.splice(bill.people.indexOf(person), 1);
+                peopleContainer.removeChild(div);
+                updateTotal();
+            }
         });
 
         div.appendChild(nameInput);
@@ -310,10 +356,12 @@ function initNewBillPage(editId) {
         syncDiscountUI();
         updateTotal();
     });
-    discountDelete.addEventListener('click', () => {
-        discountAmount = 0;
-        syncDiscountUI();
-        updateTotal();
+    discountDelete.addEventListener('click', async () => {
+        if (await confirmModal('ディスカウントを削除しますか?')) {
+            discountAmount = 0;
+            syncDiscountUI();
+            updateTotal();
+        }
     });
 
     document.getElementById('add-male').addEventListener('click', () => addPerson('male'));
@@ -380,10 +428,12 @@ function initNewBillPage(editId) {
         inc.addEventListener("click", () => { item.count++; sync(); });
         nameInput.addEventListener('input',sync);
         priceInput.addEventListener('input',sync);
-        remove.addEventListener('click',()=>{
-            bill.optionalPlans = bill.optionalPlans.filter(p=>p!==item);
-            container.removeChild(div);
-            updateTotal();
+        remove.addEventListener('click', async ()=>{
+            if (await confirmModal('本当に削除しますか?')) {
+                bill.optionalPlans = bill.optionalPlans.filter(p=>p!==item);
+                container.removeChild(div);
+                updateTotal();
+            }
         });
         div.appendChild(nameInput);
         div.appendChild(priceInput);
@@ -419,10 +469,12 @@ function initNewBillPage(editId) {
         dec.addEventListener("click", () => { if (item.count > 0) { item.count--; sync(); } });
         inc.addEventListener("click", () => { item.count++; sync(); });
         nameInput.addEventListener('input',sync);
-        remove.addEventListener('click',()=>{
-            array.splice(array.indexOf(item),1);
-            container.removeChild(div);
-            updateTotal();
+        remove.addEventListener('click', async ()=>{
+            if (await confirmModal('本当に削除しますか?')) {
+                array.splice(array.indexOf(item),1);
+                container.removeChild(div);
+                updateTotal();
+            }
         });
         div.appendChild(nameInput);
         div.appendChild(dec);
@@ -467,6 +519,7 @@ function initNewBillPage(editId) {
 // main entry
 
 document.addEventListener('DOMContentLoaded', () => {
+    setupThemeToggle();
     try {
         if (!localStorage.getItem('email')) {
             localStorage.setItem('email', DEFAULT_EMAIL);
@@ -617,8 +670,8 @@ function initPaidPage() {
                 saveBills('bills', bills);
                 initPaidPage();
             },
-            onDelete: b => {
-                if (confirm('本当に削除しますか?')) {
+            onDelete: async b => {
+                if (await confirmModal('本当に削除しますか?')) {
                     const pwd = prompt('パスワードを入力してください');
                     if (pwd === localStorage.getItem('password')) {
                         bills.splice(bills.indexOf(b), 1);
