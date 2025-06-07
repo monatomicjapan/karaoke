@@ -74,12 +74,14 @@ function initNewBillPage(editId) {
             return;
         }
         if (!('discount' in bill)) bill.discount = 0;
+        if (!('customerType' in bill)) bill.customerType = '';
         isEdit = true;
     } else {
         bill = {
             id: null,
             name: '',
             seat: '',
+            customerType: '',
             people: [],
             optionalPlans: [],
             staffD: [],
@@ -106,6 +108,14 @@ function initNewBillPage(editId) {
     const discountDisplay = document.getElementById('discount-display');
     const discountDelete = document.getElementById('discount-delete');
     const peopleContainer = document.getElementById('people-container');
+    const customerButtons = document.querySelectorAll('#customer-type-section button');
+    customerButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            customerButtons.forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            bill.customerType = btn.dataset.type;
+        });
+    });
     let discountAmount = bill.discount || 0;
 
 
@@ -116,12 +126,26 @@ function initNewBillPage(editId) {
         bill.staffD.forEach(s => { total += s.price * s.count; });
         bill.staffT.forEach(s => { total += s.price * s.count; });
         const activePeople = bill.people.filter(p => !p.earlyExit).length;
-        total += calcExtension(bill.startTime, activePeople);
+        const extension = calcExtension(bill.startTime, activePeople);
+        total += extension;
         total -= discountAmount;
         bill.discount = discountAmount;
         bill.total = total;
         if (discountDisplay) {
             discountDisplay.textContent = `ディスカウント：${discountAmount}円`;
+        }
+        const elapsedEl = document.getElementById('elapsed-time');
+        const extensionEl = document.getElementById('extension-fee');
+        if (elapsedEl && extensionEl) {
+            if (bill.startTime) {
+                const diff = Date.now() - bill.startTime;
+                const h = Math.floor(diff / 3600000);
+                const m = Math.floor((diff % 3600000) / 60000);
+                elapsedEl.textContent = `${h}:${String(m).padStart(2,'0')}`;
+            } else {
+                elapsedEl.textContent = '0:00';
+            }
+            extensionEl.textContent = extension;
         }
         document.getElementById('total').textContent = total;
     }
@@ -255,11 +279,18 @@ function initNewBillPage(editId) {
     document.getElementById('add-female').addEventListener('click', () => addPerson('female'));
 
     updateTotal();
+    setInterval(updateTotal, 60000);
 
     if (isEdit) {
         document.getElementById('bill-name').value = bill.name;
         const seat = document.querySelector(`input[name="seat"][value="${bill.seat}"]`);
         if (seat) seat.checked = true;
+        if (bill.customerType) {
+            const btn = document.querySelector(`#customer-type-section button[data-type="${bill.customerType}"]`);
+            if (btn) {
+                btn.classList.add('selected');
+            }
+        }
         if (Array.isArray(bill.people)) {
             bill.people.forEach(p => addPerson(p.gender, p));
         }
@@ -374,6 +405,8 @@ function initNewBillPage(editId) {
         bill.name = document.getElementById('bill-name').value;
         const seat = document.querySelector('input[name="seat"]:checked');
         bill.seat = seat ? seat.value : '';
+        const selectedCustomer = document.querySelector('#customer-type-section button.selected');
+        bill.customerType = selectedCustomer ? selectedCustomer.dataset.type : '';
         const parts = timeInput.value.split(':');
         const d = new Date();
         d.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);

@@ -35,6 +35,9 @@
             min-width: 80px;
             max-width: 150px;
         }
+        #customer-type-section button.selected {
+            background: #8ff;
+        }
         .discount { color: red; }
         @media (min-width: 600px) { .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1em; } }
         @media (min-width: 900px) { .grid { grid-template-columns: repeat(3,1fr); } }
@@ -56,6 +59,12 @@
         <label><input type="radio" name="seat" value="B奥">B奥</label>
         <label><input type="radio" name="seat" value="Z">Z</label>
     </div>
+    <div class="section" id="customer-type-section">
+        お客様種別:
+        <button type="button" data-type="S">S</button>
+        <button type="button" data-type="R">R</button>
+        <button type="button" data-type="J">J</button>
+    </div>
     <div class="section people-buttons">
         <button type="button" id="add-male">男性</button>
         <button type="button" id="add-female">女性</button>
@@ -69,10 +78,26 @@
         <h3>スタッフD (600円/杯)</h3>
     </div>
     <button type="button" id="add-staff-d">スタッフDを追加</button>
+    <datalist id="staff-d-container-list">
+        <option value="春">
+        <option value="喜瀬">
+        <option value="水口">
+        <option value="北尾">
+        <option value="加藤">
+        <option value="譜久村">
+    </datalist>
     <div id="staff-t-container" class="section">
         <h3>スタッフT (1000円/杯)</h3>
     </div>
     <button type="button" id="add-staff-t">スタッフTを追加</button>
+    <datalist id="staff-t-container-list">
+        <option value="春">
+        <option value="喜瀬">
+        <option value="水口">
+        <option value="北尾">
+        <option value="加藤">
+        <option value="譜久村">
+    </datalist>
     <div id="discount-section" class="section">
         <button type="button" id="discount-enter">ディスカウントを入力</button>
         <div id="discount-input-area" style="display:none;">
@@ -83,6 +108,10 @@
             <span id="discount-display" class="discount"></span>
             <button type="button" id="discount-delete">削除</button>
         </div>
+    </div>
+    <div class="section">
+        経過時間: <span id="elapsed-time">0:00</span><br>
+        延長料金: <span id="extension-fee">0</span>円
     </div>
     <div class="section">
         合計金額: <span id="total">0</span>円
